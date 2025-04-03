@@ -1,0 +1,15 @@
+[package]
+name = "anteros"
+version = "1.0.0"
+authors = []
+
+[addresses]
+anteros = "0x0fb40f927acef2e907ca2743bd0bbc6ee2439d7f6c3f08d04f98746683e1f3bd"
+[dev-addresses]
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-framework.git"
+rev = "mainnet"
+subdir = "aptos-framework"
+
+[dev-dependencies]
