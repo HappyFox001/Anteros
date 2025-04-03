@@ -1,3 +1,24 @@
+"""Anteros Backend API Service
+
+@remarks
+This FastAPI-based backend service provides essential data endpoints for the Anteros
+trending keyword trading platform. It offers both real and simulated data sources for
+keyword popularity trends, enabling the frontend to display realistic price movements
+and historical data.
+
+Key features:
+- Real-time Google Trends data integration via pytrends library
+- Mock data generation with realistic price movements and volatility
+- Time-series data for multiple timeframes (realtime, monthly, yearly)
+- Intelligent caching system to reduce external API calls
+- Stateful price simulation with trend continuity and mean reversion
+- Health check endpoint for monitoring service availability
+
+This API serves as the data foundation for the Anteros platform, providing the necessary
+market data that drives the trading experience. The combination of real Google Trends data
+and sophisticated mock data generation creates a compelling and realistic trading environment.
+"""
+
 import asyncio
 import random
 import math
