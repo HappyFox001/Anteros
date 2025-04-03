@@ -69,7 +69,7 @@ async def mock_search_trends(keyword: str) -> Dict[str, Any]:
     seed = sum(ord(c) for c in keyword)
     random.seed(seed)
 
-    base_price = 50 + (seed % 50)
+    base_price = 50 + (seed % 30)
 
     if keyword not in realtime_data_cache:
         realtime_data_cache[keyword] = []
@@ -78,9 +78,8 @@ async def mock_search_trends(keyword: str) -> Dict[str, Any]:
                 price = base_price
             else:
                 last_price = realtime_data_cache[keyword][-1]
-                fluctuation_pct = (random.random() * 20 - 10) / 100
+                fluctuation_pct = (random.random() * 4 - 2) / 100
                 price = last_price * (1 + fluctuation_pct)
-            
             if price < 10:
                 price = 10
             realtime_data_cache[keyword].append(round(price, 2))
@@ -92,22 +91,33 @@ async def mock_search_trends(keyword: str) -> Dict[str, Any]:
             realtime_data_cache[keyword].pop(0)
         
         last_price = realtime_data_cache[keyword][-1] if realtime_data_cache[keyword] else base_price
-        
-        min_fluctuation = -0.05
-        max_fluctuation = 0.05
+
+        min_fluctuation = -0.015
+        max_fluctuation = 0.015
 
         if len(realtime_data_cache[keyword]) >= 3:
             last_3_prices = realtime_data_cache[keyword][-3:]
             if all(last_3_prices[i] < last_3_prices[i+1] for i in range(len(last_3_prices)-1)):
-                min_fluctuation = -0.10
-                max_fluctuation = 0.03
+                min_fluctuation = -0.02
+                max_fluctuation = 0.01
             elif all(last_3_prices[i] > last_3_prices[i+1] for i in range(len(last_3_prices)-1)):
-                min_fluctuation = -0.03
-                max_fluctuation = 0.10
+                min_fluctuation = -0.01
+                max_fluctuation = 0.02
         
-        fluctuation_pct = random.uniform(min_fluctuation, max_fluctuation)
+        fluctuation_pct = (random.random() * (max_fluctuation - min_fluctuation) + min_fluctuation)
+
+        stability_factor = 0.05 * (base_price - last_price) / base_price
+        fluctuation_pct += stability_factor
+        
         new_price = last_price * (1 + fluctuation_pct)
-        
+
+        max_allowed = base_price * 1.15
+        min_allowed = base_price * 0.85
+        if new_price > max_allowed:
+            new_price = max_allowed
+        elif new_price < min_allowed:
+            new_price = min_allowed
+            
         if new_price < 10:
             new_price = 10
             
@@ -119,7 +129,7 @@ async def mock_search_trends(keyword: str) -> Dict[str, Any]:
     
     realtime_value = realtime_data_cache[keyword][-1]
     
-    monthly_data = round(base_price * random.uniform(0.8, 1.2), 1)
+    monthly_data = round(base_price * random.uniform(0.95, 1.05), 1)
     
     yearly_data = []
     yearly_base = base_price
@@ -128,11 +138,20 @@ async def mock_search_trends(keyword: str) -> Dict[str, Any]:
         if i == 0:
             yearly_base = base_price
         else:
-            trend_factor = math.sin(i / 5) * (yearly_base * 0.03)  # 3%的周期性波动
-            random_factor = yearly_base * (random.random() * 0.04 - 0.02)
+            trend_factor = math.sin(i / 5) * (yearly_base * 0.01)
+            random_factor = yearly_base * (random.random() * 0.01 - 0.005)
             
-            yearly_base = yearly_base + trend_factor + random_factor
+            stability_factor = 0.02 * (base_price - yearly_base) / base_price
+            
+            yearly_base = yearly_base + trend_factor + random_factor + (yearly_base * stability_factor)
         
+        max_allowed = base_price * 1.1
+        min_allowed = base_price * 0.9
+        if yearly_base > max_allowed:
+            yearly_base = max_allowed
+        elif yearly_base < min_allowed:
+            yearly_base = min_allowed
+            
         if yearly_base < 10:
             yearly_base = 10
             
