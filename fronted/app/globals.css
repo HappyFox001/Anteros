@@ -24,3 +24,37 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+#__next::after,
+#__next::before,
+body::after,
+body::before,
+[data-nextjs-scroll-focus-boundary]::before,
+[data-nextjs-scroll-focus-boundary]::after,
+.vercel-badge,
+.nextjs-badge,
+.vercel-logo,
+.next-logo,
+div[style*="z-index:9999"],
+div[style*="z-index: 9999"],
+div[style*="position:fixed"][style*="bottom:0"],
+div[style*="position: fixed"][style*="bottom: 0"],
+div[style*="position:fixed"][style*="right:0"],
+div[style*="position: fixed"][style*="right: 0"],
+div[style*="position:fixed"][style*="left:0"][style*="bottom:0"],
+div[style*="position: fixed"][style*="left: 0"][style*="bottom: 0"] {
+  display: none !important;
+  content: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
+  clip: rect(0, 0, 0, 0) !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}

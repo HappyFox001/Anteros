@@ -1,3 +1,27 @@
+/**
+ * Trending Gallery - Interactive Keyword Exploration Hub
+ *
+ * @remarks
+ * This dynamic visualization page serves as the central hub for exploring trending keywords
+ * within the Anteros ecosystem. It features an interactive, physics-based bubble interface
+ * where each bubble represents a trending keyword with its associated price and performance metrics.
+ * 
+ * Key features:
+ * - Physics-based bubble animation with realistic collision detection and response
+ * - Interactive elements that respond to user hover and click actions
+ * - Visual indicators of keyword performance through color coding and size scaling
+ * - Seamless navigation to detailed trading views for any selected keyword
+ * - Cyberpunk-inspired visual design with dynamic glow effects and color transitions
+ * - Responsive canvas that adapts to different screen sizes and device capabilities
+ * 
+ * The Trending Gallery provides an intuitive and engaging way for users to discover
+ * popular keywords and market trends, serving as the primary navigation interface for
+ * the Anteros trading ecosystem. Each bubble's size corresponds to its market capitalization,
+ * creating an immediate visual hierarchy of market importance.
+ *
+ * @packageDocumentation
+ */
+
 "use client"
 
 import { useEffect, useState, useRef } from "react"
@@ -30,10 +54,14 @@ export default function TrendingGallery() {
     { keyword: "OpenAI", price: 45, change: -2.3 },
     { keyword: "Claude", price: 32, change: -8.1 },
     { keyword: "GPT 4O", price: 56, change: 3.7 },
-    { keyword: "Aptos", price: 67, change: 1.2 },
-    { keyword: "Solana", price: 100, change: 2.5 },
-    { keyword: "Cardano", price: 120, change: 1.8 },
-    { keyword: "Earthquake", price: 150, change: 0.5 },
+    { keyword: "Aptos", price: 140, change: 1.2 },
+    { keyword: "Solana", price: 40, change: 2.5 },
+    { keyword: "Cardano", price: 60, change: 1.8 },
+    { keyword: "Earthquake", price: 70, change: 0.5 },
+    { keyword: "NFT", price: 90, change: 0.8 },
+    { keyword: "AI", price: 30, change: 1.5 },
+    { keyword: "DeFi", price: 40, change: 2.2 },
+    { keyword: "TinTinLand", price: 100, change: 1.2 },
   ])
   const animationRef = useRef<number | null>(null)
   const [hoveredKeyword, setHoveredKeyword] = useState<string | null>(null)
@@ -85,26 +113,24 @@ export default function TrendingGallery() {
   }
 
   const initBubbles = (canvas: HTMLCanvasElement) => {
-    // Cyberpunk color palette
     const cyberpunkColors = [
-      { main: "#FF00FF", glow: "#FF66FF" }, // Magenta
-      { main: "#00FFFF", glow: "#66FFFF" }, // Cyan
-      { main: "#FF3366", glow: "#FF6699" }, // Hot pink
-      { main: "#66FF33", glow: "#99FF66" }, // Neon green
-      { main: "#3366FF", glow: "#6699FF" }, // Electric blue
-      { main: "#FFFF00", glow: "#FFFF66" }, // Yellow
-      { main: "#FF9900", glow: "#FFCC66" }, // Orange
+      { main: "#FF00FF", glow: "#FF66FF" },
+      { main: "#00FFFF", glow: "#66FFFF" },
+      { main: "#FF3366", glow: "#FF6699" },
+      { main: "#66FF33", glow: "#99FF66" },
+      { main: "#3366FF", glow: "#6699FF" },
+      { main: "#FFFF00", glow: "#FFFF66" },
+      { main: "#FF9900", glow: "#FFCC66" },
+      { main: "#FF9900", glow: "#FFCC66" },
     ];
     
     const newBubbles = keywords.map(keyword => {
       const radius = 40 + (keyword.price * 0.8)
       const x = Math.random() * (canvas.width - radius * 2) + radius
       const y = Math.random() * (canvas.height - radius * 2) + radius
-      // Increased initial speed
       const dx = (Math.random() - 0.5) * 6.0
       const dy = (Math.random() - 0.5) * 6.0
       
-      // Select a random cyberpunk color pair
       const colorPair = cyberpunkColors[Math.floor(Math.random() * cyberpunkColors.length)]
       
       return { 
@@ -135,39 +161,33 @@ export default function TrendingGallery() {
 
     const drawBackground = () => {
       if (!ctx) return
-      ctx.fillStyle = "#050510" // Darker background for cyberpunk feel
+      ctx.fillStyle = "#050510"
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Draw a grid with cyberpunk style
       const gridSize = 40
       
-      // Draw horizontal grid lines
       for (let y = 0; y < canvas.height; y += gridSize) {
         ctx.beginPath()
         ctx.moveTo(0, y)
         ctx.lineTo(canvas.width, y)
         
-        // Create "perspective" effect with fading lines
         const opacity = 0.1 + 0.1 * Math.sin(y / 100 + Date.now() / 5000)
         ctx.strokeStyle = `rgba(0, 255, 255, ${opacity})`
         ctx.lineWidth = 1
         ctx.stroke()
       }
       
-      // Draw vertical grid lines
       for (let x = 0; x < canvas.width; x += gridSize) {
         ctx.beginPath()
         ctx.moveTo(x, 0)
         ctx.lineTo(x, canvas.height)
         
-        // Create "perspective" effect with fading lines
         const opacity = 0.1 + 0.1 * Math.sin(x / 100 + Date.now() / 5000)
         ctx.strokeStyle = `rgba(255, 0, 255, ${opacity})`
         ctx.lineWidth = 1
         ctx.stroke()
       }
       
-      // Add some random "data streams" in the background
       for (let i = 0; i < 5; i++) {
         const x = Math.sin(Date.now() / 2000 + i) * canvas.width/2 + canvas.width/2
         const length = 50 + Math.random() * 100
@@ -202,37 +222,31 @@ export default function TrendingGallery() {
         bubble.x += bubble.dx
         bubble.y += bubble.dy
         
-        // More frequent and stronger random movement adjustments
         if (timestamp - bubble.lastUpdate > 300) {
           bubble.dx += (Math.random() - 0.5) * 0.5
           bubble.dy += (Math.random() - 0.5) * 0.5
           bubble.lastUpdate = timestamp
-          
-          // Gradually reduce glow intensity back to normal
           bubble.glowIntensity = Math.max(0.7, bubble.glowIntensity - 0.1);
         }
         
-        // Higher maximum speed
         const speed = Math.sqrt(bubble.dx * bubble.dx + bubble.dy * bubble.dy)
         if (speed > 7.0) {
           bubble.dx = (bubble.dx / speed) * 7.0
           bubble.dy = (bubble.dy / speed) * 7.0
         }
         
-        // More energetic bouncing off walls
         if (bubble.x <= bubble.radius || bubble.x >= canvas.width - bubble.radius) {
           bubble.dx *= -0.9
           bubble.x = bubble.x <= bubble.radius ? bubble.radius : canvas.width - bubble.radius
-          bubble.glowIntensity = Math.min(bubble.glowIntensity + 0.3, 1.5); // Increase glow on wall collision
+          bubble.glowIntensity = Math.min(bubble.glowIntensity + 0.3, 1.5);
         }
         
         if (bubble.y <= bubble.radius || bubble.y >= canvas.height - bubble.radius) {
           bubble.dy *= -0.9
           bubble.y = bubble.y <= bubble.radius ? bubble.radius : canvas.height - bubble.radius
-          bubble.glowIntensity = Math.min(bubble.glowIntensity + 0.3, 1.5); // Increase glow on wall collision
+          bubble.glowIntensity = Math.min(bubble.glowIntensity + 0.3, 1.5);
         }
         
-        // Check collisions with other bubbles
         for (let j = i + 1; j < bubbles.length; j++) {
           const dx = bubbles[j].x - bubble.x;
           const dy = bubbles[j].y - bubble.y;
@@ -255,22 +269,17 @@ export default function TrendingGallery() {
           bubbleCanvas.width = canvasSize;
           bubbleCanvas.height = canvasSize;
           
-          // Create pulsating glow effect
           const pulseRate = 0.5 + Math.sin(timestamp / 500) * 0.2;
           const glowSize = bubble.radius * (0.3 + bubble.glowIntensity * pulseRate);
           
-          // Draw glow
           bubbleCtx.shadowColor = bubble.glowColor;
           bubbleCtx.shadowBlur = glowSize;
           bubbleCtx.beginPath();
           bubbleCtx.arc(canvasSize/2, canvasSize/2, bubble.radius * 0.9, 0, Math.PI * 2);
-          
-          // Use direct rgba values instead of string replacements
-          const opacity = isHovered ? 0.9 : bubble.opacity;
+
           bubbleCtx.fillStyle = bubble.color;
           bubbleCtx.fill();
-          
-          // Add inner highlight
+
           const gradient = bubbleCtx.createRadialGradient(
             canvasSize/2 - bubble.radius * 0.3, 
             canvasSize/2 - bubble.radius * 0.3, 
@@ -280,7 +289,6 @@ export default function TrendingGallery() {
             bubble.radius
           );
           
-          // Use direct rgba values for gradient
           const glowColorRgba = getColorComponents(bubble.glowColor);
           gradient.addColorStop(0, `rgba(${glowColorRgba.r}, ${glowColorRgba.g}, ${glowColorRgba.b}, 0.6)`);
           gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
@@ -293,7 +301,6 @@ export default function TrendingGallery() {
               const imageData = bubbleCtx.getImageData(x, y, 1, 1).data;
               
               if (imageData[3] > 10) {
-                // Add some random variation to pixels for a more "digital" look
                 const brightness = isHovered ? 1.2 : 1.0;
                 const r = Math.min(255, imageData[0] * brightness);
                 const g = Math.min(255, imageData[1] * brightness);
@@ -309,23 +316,15 @@ export default function TrendingGallery() {
               }
             }
           }
-          
-          // Add extra hover effects
+
           if (isHovered) {
             bubbleCtx.clearRect(0, 0, canvasSize, canvasSize);
             
-            // Draw pixelated outer ring
             bubbleCtx.beginPath();
             bubbleCtx.arc(canvasSize/2, canvasSize/2, bubble.radius + pixelSize*2, 0, Math.PI * 2);
             bubbleCtx.strokeStyle = bubble.glowColor;
             bubbleCtx.lineWidth = pixelSize;
             bubbleCtx.stroke();
-            
-            // Add scanline effect
-            for (let y = 0; y < canvasSize; y += pixelSize * 3) {
-              bubbleCtx.fillStyle = `rgba(255, 255, 255, 0.2)`;
-              bubbleCtx.fillRect(0, y, canvasSize, pixelSize);
-            }
             
             for (let x = 0; x < canvasSize; x += pixelSize) {
               for (let y = 0; y < canvasSize; y += pixelSize) {
@@ -343,8 +342,6 @@ export default function TrendingGallery() {
             }
           }
         }
-        
-        // Draw text with cyberpunk style
         const textCanvas = document.createElement('canvas');
         const textCtx = textCanvas.getContext('2d');
         if (textCtx) {
@@ -352,35 +349,33 @@ export default function TrendingGallery() {
           textCanvas.width = textSize;
           textCanvas.height = textSize;
           
-          // Text glow effect
           textCtx.shadowColor = bubble.glowColor;
-          textCtx.shadowBlur = 10;
+          textCtx.shadowBlur = 15;
           textCtx.shadowOffsetX = 0;
           textCtx.shadowOffsetY = 0;
           
-          // Draw keyword with cyberpunk style
-          textCtx.font = `bold ${Math.min(bubble.radius * 0.5, 18)}px "Courier New", monospace`;
+          textCtx.font = `bold ${Math.min(bubble.radius * 0.6, 22)}px "Courier New", monospace`;
           textCtx.textAlign = 'center';
           textCtx.textBaseline = 'middle';
           textCtx.fillStyle = '#FFFFFF';
           
-          // Add scanline effect to text
-          const scanLineHeight = Math.max(2, Math.floor(bubble.radius * 0.05));
-          for (let y = 0; y < textSize; y += scanLineHeight * 3) {
-            textCtx.fillRect(0, y, textSize, scanLineHeight);
-          }
+          textCtx.strokeStyle = '#000000';
+          textCtx.lineWidth = 3;
+          textCtx.strokeText(bubble.keyword.keyword, textSize/2, textSize/2);
           
-          // Draw keyword text
           textCtx.fillStyle = isHovered ? bubble.glowColor : '#FFFFFF';
           textCtx.fillText(bubble.keyword.keyword, textSize/2, textSize/2);
           
-          // Draw change percentage with appropriate color
           const changeText = `${bubble.keyword.change > 0 ? '+' : ''}${bubble.keyword.change}%`;
-          textCtx.fillStyle = bubble.keyword.change >= 0 ? '#00FF00' : '#FF0000';
-          textCtx.font = `${Math.min(bubble.radius * 0.3, 14)}px "Courier New", monospace`;
-          textCtx.fillText(changeText, textSize/2, textSize/2 + bubble.radius * 0.4);
+          textCtx.font = `bold ${Math.min(bubble.radius * 0.35, 16)}px "Courier New", monospace`;
           
-          // Draw the text canvas onto the main canvas
+          textCtx.strokeStyle = '#000000';
+          textCtx.lineWidth = 2;
+          textCtx.strokeText(changeText, textSize/2, textSize/2 + bubble.radius * 0.45);
+          
+          textCtx.fillStyle = bubble.keyword.change >= 0 ? '#00FF00' : '#FF0000';
+          textCtx.fillText(changeText, textSize/2, textSize/2 + bubble.radius * 0.45);
+          
           ctx.drawImage(
             textCanvas, 
             bubble.x - textSize/2, 
@@ -441,33 +436,26 @@ export default function TrendingGallery() {
     if (hoveredKeyword) {
       console.log(`点击了关键词: ${hoveredKeyword}`);
       
-      // 跳转到交易页面，将关键词作为参数传递
       router.push(`/trade/${encodeURIComponent(hoveredKeyword)}`);
     }
   }
 
-  // Helper function to convert hex color to RGB components
   const getColorComponents = (color: string) => {
-    // Default values
     const defaultColor = { r: 255, g: 102, b: 255 };
     
-    // Return default if color is invalid
     if (!color || typeof color !== 'string') {
       return defaultColor;
     }
     
-    // Handle hex colors
     if (color.startsWith('#')) {
       const hex = color.slice(1);
       if (hex.length === 3) {
-        // #RGB format
         return {
           r: parseInt(hex[0] + hex[0], 16),
           g: parseInt(hex[1] + hex[1], 16),
           b: parseInt(hex[2] + hex[2], 16)
         };
       } else if (hex.length === 6) {
-        // #RRGGBB format
         return {
           r: parseInt(hex.slice(0, 2), 16),
           g: parseInt(hex.slice(2, 4), 16),
@@ -476,7 +464,6 @@ export default function TrendingGallery() {
       }
     }
     
-    // Return default for any other format
     return defaultColor;
   };
 

@@ -1,23 +1,45 @@
+/**
+ * Home Page - Anteros Interactive Experience
+ *
+ * @remarks
+ * Welcome to the Anteros platform's immersive home page. This page serves as the gateway to our
+ * decentralized trading ecosystem, featuring a visually stunning cyberpunk-inspired design.
+ * 
+ * Key features:
+ * - Interactive pixel-art animation with dynamic text rendering
+ * - Physics-based collision system that responds to user interaction
+ * - Neon-themed visual elements with glow effects that pulse and react
+ * - Seamless transition effects when navigating to other sections
+ * - Press-and-hold interaction pattern for intentional navigation
+ * 
+ * The home page establishes the futuristic aesthetic of the platform while providing
+ * an engaging entry point that introduces users to the Anteros experience through
+ * interactive visual elements rather than traditional UI components.
+ *
+ * @packageDocumentation
+ */
+
+
 "use client"
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 
-// Cyberpunk color palette
 const CYBERPUNK_COLORS = [
-  "#FF00FF", // Magenta
-  "#00FFFF", // Cyan
-  "#FF3366", // Hot pink
-  "#66FF33", // Neon green
-  "#3366FF", // Electric blue
-  "#FFFF00", // Yellow
-  "#FF9900", // Orange
+  "#FF00FF",
+  "#00FFFF",
+  "#FF3366",
+  "#66FF33",
+  "#3366FF",
+  "#FFFF00",
+  "#FF9900",
 ]
+const PREMIUM_WHITE = "rgba(255, 255, 255, 0.7)" 
 const COLOR = "#FFFFFF"
 const HIT_COLOR = "#333333"
-const BACKGROUND_COLOR = "#000000"
-const BALL_COLOR = "#00FFFF" // Cyan for the ball
-const PADDLE_COLOR = "#FF00FF" // Magenta for paddles
+const BACKGROUND_COLOR = "#0A0A0F"
+const BALL_COLOR = "#00FFFF"
+const PADDLE_COLOR = "#FF00FF"
 const LETTER_SPACING = 1
 const WORD_SPACING = 3
 
@@ -226,7 +248,7 @@ export function AnterosIsAllYouNeed() {
       const BALL_SPEED = 6 * scale
 
       pixelsRef.current = []
-      const words = ["ANTEROS", "IS ALL YOU NEED"]
+      const words = ["ANTEROS", "ATTENTION", "IS ALL YOU NEED"]
 
       const calculateWordWidth = (word: string, pixelSize: number) => {
         return (
@@ -239,10 +261,11 @@ export function AnterosIsAllYouNeed() {
       }
 
       const totalWidthLarge = calculateWordWidth(words[0], LARGE_PIXEL_SIZE)
-      const totalWidthSmall = words[1].split(" ").reduce((width, word, index) => {
+      const totalWidthMedium = calculateWordWidth(words[1], SMALL_PIXEL_SIZE)
+      const totalWidthSmall = words[2].split(" ").reduce((width, word, index) => {
         return width + calculateWordWidth(word, SMALL_PIXEL_SIZE) + (index > 0 ? WORD_SPACING * SMALL_PIXEL_SIZE : 0)
       }, 0)
-      const totalWidth = Math.max(totalWidthLarge, totalWidthSmall)
+      const totalWidth = Math.max(totalWidthLarge, totalWidthMedium, totalWidthSmall)
       const scaleFactor = (canvas.width * 0.8) / totalWidth
 
       const adjustedLargePixelSize = LARGE_PIXEL_SIZE * scaleFactor
@@ -250,27 +273,32 @@ export function AnterosIsAllYouNeed() {
 
       const largeTextHeight = 5 * adjustedLargePixelSize
       const smallTextHeight = 5 * adjustedSmallPixelSize
-      const spaceBetweenLines = 5 * adjustedLargePixelSize
-      const totalTextHeight = largeTextHeight + spaceBetweenLines + smallTextHeight
+      const spaceBetweenLines = 3 * adjustedLargePixelSize
+      const totalTextHeight = largeTextHeight + spaceBetweenLines * 2 + smallTextHeight * 2
 
       let startY = (canvas.height - totalTextHeight) / 2
 
       words.forEach((word, wordIndex) => {
         const pixelSize = wordIndex === 0 ? adjustedLargePixelSize : adjustedSmallPixelSize
-        const totalWidth =
-          wordIndex === 0
-            ? calculateWordWidth(word, adjustedLargePixelSize)
-            : words[1].split(" ").reduce((width, w, index) => {
-                return (
-                  width +
-                  calculateWordWidth(w, adjustedSmallPixelSize) +
-                  (index > 0 ? WORD_SPACING * adjustedSmallPixelSize : 0)
-                )
-              }, 0)
+        let totalWidth;
+        
+        if (wordIndex === 0) {
+          totalWidth = calculateWordWidth(word, adjustedLargePixelSize);
+        } else if (wordIndex === 1) {
+          totalWidth = calculateWordWidth(word, adjustedSmallPixelSize);
+        } else {
+          totalWidth = word.split(" ").reduce((width, w, index) => {
+            return (
+              width +
+              calculateWordWidth(w, adjustedSmallPixelSize) +
+              (index > 0 ? WORD_SPACING * adjustedSmallPixelSize : 0)
+            )
+          }, 0);
+        }
 
         let startX = (canvas.width - totalWidth) / 2
 
-        if (wordIndex === 1) {
+        if (wordIndex === 2) {
           word.split(" ").forEach((subWord) => {
             subWord.split("").forEach((letter) => {
               const pixelMap = PIXEL_MAP[letter as keyof typeof PIXEL_MAP]
@@ -281,9 +309,7 @@ export function AnterosIsAllYouNeed() {
                   if (pixelMap[i][j]) {
                     const x = startX + j * pixelSize
                     const y = startY + i * pixelSize
-                    // Assign a random cyberpunk color to each pixel
                     const color = CYBERPUNK_COLORS[Math.floor(Math.random() * CYBERPUNK_COLORS.length)]
-                    // Random glow intensity between 0.5 and 1
                     const glowIntensity = 0.5 + Math.random() * 0.5
                     pixelsRef.current.push({ x, y, size: pixelSize, hit: false, color, glowIntensity })
                   }
@@ -303,10 +329,18 @@ export function AnterosIsAllYouNeed() {
                 if (pixelMap[i][j]) {
                   const x = startX + j * pixelSize
                   const y = startY + i * pixelSize
-                  // Assign a random cyberpunk color to each pixel
-                  const color = CYBERPUNK_COLORS[Math.floor(Math.random() * CYBERPUNK_COLORS.length)]
-                  // Random glow intensity between 0.5 and 1
-                  const glowIntensity = 0.5 + Math.random() * 0.5
+
+                  let color;
+                  let glowIntensity;
+                  
+                  if (wordIndex === 0) {
+                    color = PREMIUM_WHITE
+                    glowIntensity = 0.9
+                  } else {
+                    color = CYBERPUNK_COLORS[Math.floor(Math.random() * CYBERPUNK_COLORS.length)]
+                    glowIntensity = 0.5 + Math.random() * 0.5
+                  }
+                  
                   pixelsRef.current.push({ x, y, size: pixelSize, hit: false, color, glowIntensity })
                 }
               }
@@ -314,7 +348,12 @@ export function AnterosIsAllYouNeed() {
             startX += (pixelMap[0].length + LETTER_SPACING) * pixelSize
           })
         }
-        startY += wordIndex === 0 ? largeTextHeight + spaceBetweenLines : 0
+        
+        if (wordIndex === 0) {
+          startY += largeTextHeight + spaceBetweenLines;
+        } else if (wordIndex === 1) {
+          startY += smallTextHeight + spaceBetweenLines;
+        }
       })
 
       const ballStartX = canvas.width * 0.9
@@ -416,8 +455,11 @@ export function AnterosIsAllYouNeed() {
       })
 
       pixelsRef.current.forEach((pixel) => {
+        const isAnteros = pixel.color === PREMIUM_WHITE;
+        
         if (
           !pixel.hit &&
+          !isAnteros &&
           ball.x + ball.radius > pixel.x &&
           ball.x - ball.radius < pixel.x + pixel.size &&
           ball.y + ball.radius > pixel.y &&
@@ -440,29 +482,26 @@ export function AnterosIsAllYouNeed() {
 
       ctx.fillStyle = BACKGROUND_COLOR
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      // Draw pixels with cyberpunk colors and glow effects
-      pixelsRef.current.forEach((pixel) => {
+      
+      const anterosPixels = pixelsRef.current.filter(pixel => pixel.color === PREMIUM_WHITE && !pixel.hit);
+      const otherPixels = pixelsRef.current.filter(pixel => pixel.color !== PREMIUM_WHITE || pixel.hit);
+      
+      otherPixels.forEach((pixel) => {
         if (pixel.hit) {
-          // Dimmed color for hit pixels
           ctx.fillStyle = `rgba(51, 51, 51, ${1 - fadeProgress})`
           ctx.fillRect(pixel.x, pixel.y, pixel.size, pixel.size)
         } else {
-          // Add glow effect
-          const glow = pixel.glowIntensity * (0.7 + 0.3 * Math.sin(Date.now() / 500)) // Pulsating glow
+          const glow = pixel.glowIntensity * (0.7 + 0.3 * Math.sin(Date.now() / 500))
           ctx.shadowColor = pixel.color
           ctx.shadowBlur = pixel.size * glow
           
-          // Draw the pixel with its cyberpunk color
           ctx.fillStyle = `${pixel.color}${Math.floor((1 - fadeProgress) * 255).toString(16).padStart(2, '0')}`
           ctx.fillRect(pixel.x, pixel.y, pixel.size, pixel.size)
           
-          // Reset shadow for other elements
           ctx.shadowBlur = 0
         }
       })
 
-      // Update ball with cyan color and glow
       ctx.shadowColor = BALL_COLOR
       ctx.shadowBlur = ballRef.current.radius * 1.5
       ctx.fillStyle = `${BALL_COLOR}${Math.floor((1 - fadeProgress) * 255).toString(16).padStart(2, '0')}`
@@ -470,15 +509,24 @@ export function AnterosIsAllYouNeed() {
       ctx.arc(ballRef.current.x, ballRef.current.y, ballRef.current.radius, 0, Math.PI * 2)
       ctx.fill()
 
-      // Update paddles with magenta color and glow
       ctx.shadowColor = PADDLE_COLOR
       ctx.shadowBlur = 10 * scaleRef.current
       ctx.fillStyle = `${PADDLE_COLOR}${Math.floor((1 - fadeProgress) * 255).toString(16).padStart(2, '0')}`
       paddlesRef.current.forEach((paddle) => {
         ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height)
       })
+
+      anterosPixels.forEach((pixel) => {
+        const glow = pixel.glowIntensity * (0.7 + 0.3 * Math.sin(Date.now() / 500))
+        ctx.shadowColor = "rgba(255, 255, 255, 0.9)"
+        ctx.shadowBlur = pixel.size * glow * 1.5 
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.7 * (1 - fadeProgress)})`
+        ctx.fillRect(pixel.x, pixel.y, pixel.size, pixel.size)
+        
+        ctx.shadowBlur = 0
+      })
       
-      // Reset shadow
       ctx.shadowBlur = 0
     }
 
