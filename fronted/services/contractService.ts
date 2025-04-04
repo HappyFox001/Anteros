@@ -1,3 +1,25 @@
+/**
+ * Contract Service - Blockchain Interaction Layer
+ *
+ * @remarks
+ * This service provides a comprehensive interface for interacting with the Anteros smart contracts
+ * on the Aptos blockchain. It abstracts away the complexity of blockchain transactions and
+ * provides a clean, typed API for the frontend application to use.
+ * 
+ * Key features:
+ * - Position management (opening long and short positions on keywords)
+ * - Real-time price data retrieval with intelligent caching
+ * - Contract price and funding rate calculations
+ * - User position tracking and management
+ * - Trend data updates and oracle interactions
+ * - Error handling and fallback mechanisms for blockchain operations
+ * 
+ * The ContractService is the core bridge between the Anteros frontend and blockchain,
+ * implementing all necessary methods to interact with the trend_trading module deployed
+ * on the Aptos testnet. It uses the Aptos TS SDK for blockchain communication and
+ * integrates with the wallet adapter for transaction signing.
+ */
+
 import { Aptos, AptosConfig, Network } from '@aptos-labs/ts-sdk';
 import { useWallet } from '@aptos-labs/wallet-adapter-react';
 import { InputTransactionData } from '@aptos-labs/wallet-adapter-core';
@@ -20,7 +42,7 @@ const globalCache: {
   fundingRates: {}
 };
 
-const CACHE_TTL = 20000; // 20秒
+const CACHE_TTL = 20000;
 
 const isCacheValid = (timestamp: number) => {
   return Date.now() - timestamp < CACHE_TTL;
@@ -45,7 +67,6 @@ export const useContractService = (): ContractService => {
     }
     console.log(1)
     try {
-      // 构建交易
       const transaction = ({
         sender: account.address,
         data: {
@@ -59,11 +80,9 @@ export const useContractService = (): ContractService => {
       });
       console.log(2)
       
-      // 直接传递transaction对象给钱包适配器
       const pendingTxn = await signAndSubmitTransaction(transaction as InputTransactionData);
       
       console.log(3)
-      // 等待交易完成
       const committedTxn = await aptos.waitForTransaction({
         transactionHash: pendingTxn.hash
       });
@@ -81,7 +100,6 @@ export const useContractService = (): ContractService => {
     }
 
     try {
-      // 构建交易
       const transaction = ({
         sender: account.address,
         data: {
@@ -94,10 +112,8 @@ export const useContractService = (): ContractService => {
         },
       });
 
-      // 直接传递transaction对象给钱包适配器
       const pendingTxn = await signAndSubmitTransaction(transaction as InputTransactionData);
 
-      // 等待交易完成
       const committedTxn = await aptos.waitForTransaction({
         transactionHash: pendingTxn.hash
       });
@@ -111,13 +127,11 @@ export const useContractService = (): ContractService => {
 
   const getContractPrice = async (): Promise<number> => {
     try {
-      // 检查缓存
       if (globalCache.contractPrice && isCacheValid(globalCache.contractPrice.timestamp)) {
         console.log('使用缓存的合约价格');
         return globalCache.contractPrice.value;
       }
       
-      // 尝试使用view函数调用
       try {
         const response = await aptos.view({
           payload: {
@@ -127,31 +141,27 @@ export const useContractService = (): ContractService => {
         });
         const value = Number(response[0]);
         
-        // 更新缓存
         globalCache.contractPrice = { value, timestamp: Date.now() };
         
         return value;
       } catch (viewError: any) {
         console.warn('通过view调用获取合约价格失败，返回默认值:', viewError);
         
-        // 如果合约未初始化或其他错误，返回默认值
-        return 100; // 返回默认值
+        return 100;
       }
     } catch (error) {
       console.error('获取合约价格失败:', error);
-      return 100; // 返回默认值
+      return 100;
     }
   };
 
   const getFundingRate = async (keyword: string): Promise<number> => {
     try {
-      // 检查缓存
       if (globalCache.fundingRates[keyword] && isCacheValid(globalCache.fundingRates[keyword].timestamp)) {
         console.log(`使用缓存的资金费率 (${keyword})`);
         return globalCache.fundingRates[keyword].value;
       }
       
-      // 尝试使用view函数调用
       try {
         const response = await aptos.view({
           payload: {
@@ -161,31 +171,28 @@ export const useContractService = (): ContractService => {
         });
         const value = Number(response[0]);
         
-        // 更新缓存
         globalCache.fundingRates[keyword] = { value, timestamp: Date.now() };
         
         return value;
       } catch (viewError: any) {
         console.warn('通过view调用获取资金费率失败，返回默认值:', viewError);
         
-        // 检查是否是E_DATA_NOT_FOUND错误
         if (viewError.message && viewError.message.includes('E_DATA_NOT_FOUND') || 
             viewError.message && viewError.message.includes('sub_status: Some(2)')) {
           console.log(`关键词 "${keyword}" 在oracle中不存在，使用默认资金费率`);
-          return 10; // 默认资金费率为1%（10个基点）
+          return 10;
         }
         
-        return 0; // 返回默认值
+        return 0;
       }
     } catch (error) {
       console.error('获取资金费率失败:', error);
-      return 0; // 返回默认值
+      return 0;
     }
   };
 
   const getUserPosition = async (userAddress: string): Promise<{size: number, isLong: boolean, entryPrice: number}> => {
     try {
-      // 尝试使用view函数调用
       try {
         const response = await aptos.view({
           payload: {
@@ -202,7 +209,6 @@ export const useContractService = (): ContractService => {
       } catch (viewError) {
         console.warn('通过view调用获取用户仓位失败，尝试从资源中获取:', viewError);
         
-        // 如果view调用失败，尝试从资源中获取
         const resources = await aptos.getAccountResources({
           accountAddress: CONTRACT_ADDRESS
         });
@@ -214,33 +220,27 @@ export const useContractService = (): ContractService => {
         if (!tradingState || !tradingState.data) {
           return { size: 0, isLong: false, entryPrice: 0 };
         }
-        
-        // 使用类型断言解决TypeScript类型错误
+
         const data = tradingState.data as { positions?: any };
         if (!data.positions) {
           return { size: 0, isLong: false, entryPrice: 0 };
         }
         
-        // 尝试从positions表中获取用户仓位
-        // 注意：这可能无法直接访问表中的数据，取决于Move合约的实现
-        // 这是一个后备方案，可能需要根据实际情况调整
         return { size: 0, isLong: false, entryPrice: 0 };
       }
     } catch (error) {
       console.error('获取用户仓位失败:', error);
-      return { size: 0, isLong: false, entryPrice: 0 }; // 返回默认值
+      return { size: 0, isLong: false, entryPrice: 0 };
     }
   };
 
   const getSpotPrice = async (keyword: string): Promise<number> => {
     try {
-      // 检查缓存
       if (globalCache.spotPrices[keyword] && isCacheValid(globalCache.spotPrices[keyword].timestamp)) {
         console.log(`使用缓存的现货价格 (${keyword})`);
         return globalCache.spotPrices[keyword].value;
       }
       
-      // 尝试使用view函数调用
       try {
         const response = await aptos.view({
           payload: {
@@ -250,32 +250,28 @@ export const useContractService = (): ContractService => {
         });
         const value = Number(response[0]);
         
-        // 更新缓存
         globalCache.spotPrices[keyword] = { value, timestamp: Date.now() };
         
         return value;
       } catch (viewError: any) {
         console.warn('通过view调用获取现货价格失败，返回默认值:', viewError);
         
-        // 检查是否是E_DATA_NOT_FOUND错误
         if (viewError.message && viewError.message.includes('E_DATA_NOT_FOUND') || 
             viewError.message && viewError.message.includes('sub_status: Some(2)')) {
           console.log(`关键词 "${keyword}" 在oracle中不存在，使用默认价格`);
           
-          // 对于不存在的关键词，使用默认值
           if (keyword.toLowerCase() === 'trump') return 120;
           if (keyword.toLowerCase() === 'biden') return 110;
           if (keyword.toLowerCase() === 'harris') return 105;
           
-          // 其他关键词使用通用默认值
           return 100;
         }
         
-        return 100; // 返回默认值，与合约中的默认值一致
+        return 100;
       }
     } catch (error) {
       console.error('获取现货价格失败:', error);
-      return 100; // 返回默认值
+      return 100;
     }
   };
 
