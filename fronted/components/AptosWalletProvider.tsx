@@ -1,3 +1,23 @@
+/**
+ * AptosWalletProvider Component - Blockchain Wallet Integration
+ *
+ * @remarks
+ * This component serves as the foundation for blockchain interactions within the Anteros platform,
+ * providing seamless integration with the Aptos blockchain through wallet connectivity.
+ * 
+ * Key features:
+ * - Automatic connection to supported Aptos wallets (primarily Petra)
+ * - Testnet configuration for development and testing purposes
+ * - Comprehensive error handling for wallet connection issues
+ * - Context provider pattern that makes wallet functionality available throughout the application
+ * - Simplified interface that abstracts away blockchain complexity
+ * 
+ * The AptosWalletProvider wraps the entire application to ensure that wallet state and
+ * functionality are accessible to all components that require blockchain interaction.
+ * This component is essential for enabling transactions, account management, and on-chain
+ * data retrieval throughout the Anteros platform.
+ */
+
 "use client";
 
 import { ReactNode } from 'react';

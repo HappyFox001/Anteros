@@ -1,3 +1,24 @@
+/**
+ * WalletConnect Component - User Wallet Interface
+ *
+ * @remarks
+ * This component provides the user interface for connecting to and interacting with
+ * the Aptos blockchain via the Petra wallet. It serves as the primary entry point for
+ * all blockchain transactions and account management within the Anteros platform.
+ * 
+ * Key features:
+ * - Seamless connection to Petra wallet with clear visual feedback
+ * - Real-time account balance display with automatic updates
+ * - Dropdown interface for wallet information and management options
+ * - Address truncation for improved UI readability
+ * - Network status indication and wallet disconnection functionality
+ * - Responsive design that adapts to different viewport sizes
+ * 
+ * The WalletConnect component is strategically placed throughout the application to provide
+ * consistent access to wallet functionality. It handles all wallet connection states
+ * gracefully and provides users with clear feedback about their connection status.
+ */
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -61,8 +82,7 @@ export default function WalletConnect() {
   }, [connected, account]);
 
   const handleConnect = async () => {
-    // 专门连接Petra钱包
-    const petraWallet = wallets.find(w => w.name === 'Petra');
+  const petraWallet = wallets.find(w => w.name === 'Petra');
     if (petraWallet) {
       await connect(petraWallet.name);
     } else {
