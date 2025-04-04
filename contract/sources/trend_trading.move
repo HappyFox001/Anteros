@@ -1,3 +1,18 @@
+/**
+ * @title Trend Trading Smart Contract
+ * @dev This module implements a decentralized trading platform for keyword trend positions
+ *
+ * The Trend Trading contract allows users to open long or short positions on keyword popularity trends.
+ * It integrates with the Search Trends Oracle to fetch real-time and monthly trend data for keywords,
+ * which are used to calculate spot prices. The contract manages position sizes, entry prices, and
+ * calculates funding rates based on the deviation between contract and spot prices.
+ *
+ * Key features:
+ * - Position management: Users can open long/short positions on keyword trends
+ * - Dynamic pricing: Prices are derived from oracle data with adjustments for market impact
+ * - Funding rate mechanism: Helps maintain price alignment with the underlying trend data
+ * - View functions: Provides visibility into contract state, positions, and price calculations
+ */
 module anteros::trend_trading {
     use std::error;
     use std::signer;

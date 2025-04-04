@@ -1,3 +1,25 @@
+/// @title Search Trends Oracle
+/// 
+/// @notice This module implements an on-chain oracle for search trend data, providing
+/// a decentralized source of truth for keyword popularity metrics that power the
+/// Anteros trading platform.
+///
+/// @dev The oracle stores both realtime and monthly trend values for various keywords,
+/// enabling the calculation of funding rates and contract prices in the trading system.
+/// It includes automatic data generation for new keywords and staleness checks to ensure
+/// data quality.
+///
+/// Key features:
+/// - Secure on-chain storage of keyword trend data with timestamps
+/// - Event emission for all data updates for off-chain tracking
+/// - Automatic generation of default values for new keywords
+/// - Staleness checking to ensure data freshness
+/// - Helper functions for decimal conversion and data validation
+///
+/// This oracle serves as the foundation for the Anteros prediction market, providing
+/// reliable price feeds that determine position values, funding rates, and settlement
+/// prices for all keyword-based trading contracts.
+
 module anteros::search_trends_oracle {
     use std::string::String;
     use std::signer;
@@ -37,10 +59,8 @@ module anteros::search_trends_oracle {
     public fun initialize(account: &signer) {
         let trends = table::new<String, TrendData>();
 
-        // Add initial test data
         let current_time = timestamp::now_seconds();
 
-        // Bitcoin data
         table::add(
             &mut trends,
             string::utf8(b"bitcoin"),
@@ -52,7 +72,6 @@ module anteros::search_trends_oracle {
             }
         );
 
-        // Ethereum data
         table::add(
             &mut trends,
             string::utf8(b"ethereum"),
@@ -64,7 +83,6 @@ module anteros::search_trends_oracle {
             }
         );
 
-        // NFT data
         table::add(
             &mut trends,
             string::utf8(b"nft"),
@@ -123,20 +141,16 @@ module anteros::search_trends_oracle {
         assert!(exists<SearchTrendsOracle>(oracle_addr), E_NOT_INITIALIZED);
         let oracle = borrow_global_mut<SearchTrendsOracle>(oracle_addr);
         
-        // If keyword does not exist, create default data
         if (!table::contains(&oracle.trends, keyword)) {
             let current_time = timestamp::now_seconds();
             
-            // Create default data
             let default_realtime_value = 100;
             let default_monthly_value = 100;
             let default_note = string::utf8(b"Auto-generated default data");
             
-            // Adjust default values based on keyword to make different keywords have different initial prices
             let keyword_bytes = string::bytes(&keyword);
             let keyword_length = vector::length(keyword_bytes);
             
-            // Use keyword length as a random seed to generate some variation
             if (keyword_length > 0) {
                 let seed = (keyword_length as u64) * 5;
                 default_realtime_value = 80 + seed % 40; // Range 80-120
@@ -152,7 +166,6 @@ module anteros::search_trends_oracle {
             
             table::add(&mut oracle.trends, keyword, new_trend_data);
             
-            // Emit event
             event::emit_event(
                 &mut oracle.update_events,
                 TrendUpdateEvent {
