@@ -264,6 +264,11 @@ By providing a robust and functional sentiment derivative market on Aptos, we ca
 - Create a new revenue stream for platforms and content creators
 - Increase the adoption of Aptos and its ecosystem
 
+## 🤝 Team
+- [Treap](https://github.com/TreapGoGo) (CEO)
+- [张谦](https://github.com/HappyFox001) (CTO)
+- [欢喜](https://github.com/Undertone0809) (COO)
+- [zeeland](https://github.com/soberli404) (strategy consultant)
 
 ## 👥 Contributing
 
